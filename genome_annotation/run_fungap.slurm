@@ -22,12 +22,14 @@ export AUGUSTUS_SCRIPTS_PATH=/opt/conda/bin
 
 ## for GeneMark to work, a non-expired gm_key_64 has to be placed at ~/.gn_key 
 
-singularity exec /global/scratch/users/pierrj/fungap_runs/fungap.sif python /workspace/FunGAP/fungap.py \
-                                                        --output_dir fungap_out \
-                                                        --trans_read_1 ../template_run/ERR5875670_1.fastq \
-                                                        --trans_read_2 ../template_run/ERR5875670_2.fastq \
-                                                        --genome_assembly ../Assembly/${genome}_final.scaffolds.fasta  \
-                                                        --augustus_species magnaporthe_grisea  \
-                                                        --sister_proteome ../template_run/prot_db.faa  \
-                                                        --busco_dataset sordariomycetes_odb10 \
-                                                        --num_cores ${SLURM_NTASKS}
+singularity shell /global/scratch/users/pierrj/fungap_runs/fungap.sif
+
+python /workspace/FunGAP/fungap.py \
+        --output_dir fungap_out \
+        --trans_read_1 ../template_run/ERR5875670_1.fastq \
+        --trans_read_2 ../template_run/ERR5875670_2.fastq \
+        --genome_assembly ../Assembly/${genome}_final.scaffolds.fasta  \
+        --augustus_species magnaporthe_grisea  \
+        --sister_proteome ../template_run/prot_db.faa  \
+        --busco_dataset sordariomycetes_odb10 \
+        --num_cores ${SLURM_NTASKS}
