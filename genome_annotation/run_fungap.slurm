@@ -24,7 +24,7 @@ export AUGUSTUS_SCRIPTS_PATH=/opt/conda/bin
 
 singularity shell /global/scratch/users/pierrj/fungap_runs/fungap.sif
 
-singularity exec /workspace/FunGAP/fungap.py \
+singularity exec /global/scratch/users/pierrj/fungap_runs/fungap.sif python /workspace/FunGAP/fungap.py \
         --output_dir fungap_out \
         --trans_read_1 ../template_run/ERR5875670_1.fastq \
         --trans_read_2 ../template_run/ERR5875670_2.fastq \
