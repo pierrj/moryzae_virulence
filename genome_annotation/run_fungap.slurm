@@ -22,8 +22,6 @@ export AUGUSTUS_SCRIPTS_PATH=/opt/conda/bin
 
 ## for GeneMark to work, a non-expired gm_key_64 has to be placed at ~/.gn_key 
 
-singularity shell /global/scratch/users/pierrj/fungap_runs/fungap.sif
-
 singularity exec /global/scratch/users/pierrj/fungap_runs/fungap.sif python /workspace/FunGAP/fungap.py \
         --output_dir fungap_out \
         --trans_read_1 ../template_run/ERR5875670_1.fastq \

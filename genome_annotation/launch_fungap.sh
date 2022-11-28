@@ -20,7 +20,7 @@ while read genome; do
 done < strain_names
 
 genome=KVK1
-sbatch --job-name=${genome}_run_fungap --export=genome=$genome /global/scratch/users/pierrj/moryzae_virulence/genome_annotation/run_fungap.slurm
+sbatch -p savio4_htc -A co_minium --qos=minium_htc4_normal --job-name=${genome}_run_fungap --export=genome=$genome /global/scratch/users/pierrj/moryzae_virulence/genome_annotation/run_fungap.slurm
 
 ## to relaunch failed jobs due to busco download error
 
