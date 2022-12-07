@@ -16,11 +16,10 @@ module purge
 
 export PERL5LIB=''
 
-## these paths have to be set otherwise augustus tries to write within the singularity container
+## this path has to be set otherwise augustus tries to write within the singularity container
 export AUGUSTUS_CONFIG_PATH=/global/scratch/users/pierrj/fungap_runs/fungap_config_copy/
-export AUGUSTUS_SCRIPTS_PATH=/opt/conda/bin
 
-## for GeneMark to work, a non-expired gm_key_64 has to be placed at ~/.gn_key 
+## for GeneMark to work, a non-expired gm_key_64 has to be placed at ~/.gm_key 
 
 singularity exec /global/scratch/users/pierrj/fungap_runs/fungap.sif python /workspace/FunGAP/fungap.py \
         --output_dir fungap_out \
