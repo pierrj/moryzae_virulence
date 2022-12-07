@@ -9,7 +9,7 @@ module purge
 
 module load python
 
-conda activate /global/scratch/users/pierrj/conda_envs/mov_orthofinder
+conda activate /global/scratch/users/pierrj/conda_envs/orthofinder
 
 ## copy over fungap outputs and process
 
@@ -27,14 +27,19 @@ while read genome; do
     cp /global/scratch/users/pierrj/moryzae_virulence_project/genome_annotation/${genome}/fungap_out/fungap_out/fungap_out_prot.faa all_proteomes/${genome}_fungap_out_prot.faa
 done < /global/scratch/users/pierrj/moryzae_virulence_project/genome_annotation/strain_names
 
-while read genome; do
-    echo $genome
-    awk '{print $1}' /global/scratch/users/pierrj/moryzae_virulence_project/genome_annotation/${genome}/fungap_out/fungap_out/fungap_out_prot.faa | grep t1
-done < /global/scratch/users/pierrj/moryzae_virulence_project/genome_annotation/strain_names
+cp -r /global/scratch/users/pierrj/moryzae_virulence_project/genome_annotation/Assembly .
 
-orthofinder -op -S diamond_ultra_sens -f all_proteomes_corrected -o orthofinder | grep "diamond blastp" > jobqueue
+/global/scratch/users/pierrj/conda_envs/orthofinder/bin/python /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/process_fungap_out_and_assemblies.py \
+                                                                                                                                        Assembly \
+                                                                                                                                        Assembly_renamed \
+                                                                                                                                        all_gffs \
+                                                                                                                                        all_gffs_processed \
+                                                                                                                                        all_proteomes \
+                                                                                                                                        all_proteomes_processed
 
-N_NODES=50
+orthofinder -op -S diamond_ultra_sens -f all_proteomes_processed -n out -o orthofinder_out | grep "diamond blastp" > jobqueue
+
+N_NODES=4
 
 mv jobqueue jobqueue_old
 
@@ -45,5 +50,5 @@ split -a 3 --number=l/${N_NODES} --numeric-suffixes=1 jobqueue jobqueue_
 for node in $(seq -f "%03g" 1 ${N_NODES})
 do
     echo $node
-    sbatch -p savio2 --ntasks-per-node 24 --job-name=$node.blast --export=ALL,node=$node /global/home/users/pierrj/git/slurm/orthofinder_blast.slurm
+    sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal --job-name=$node.blast --export=ALL,node=$node /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/orthofinder_blast.slurm
 done
