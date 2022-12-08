@@ -6,7 +6,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 
 msa_dir = sys.argv[1]
-output = sys.argv[3]
+output = sys.argv[2]
 
 genomes_dict = {}
 

@@ -18,8 +18,7 @@ source activate /global/scratch/users/pierrj/conda_envs/orthofinder
 
 module purge
 
-SCO_DIR=orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out/Single_Copy_Orthologue_Sequences
-ACCESSIONS=$PROJECT_DIR/output_accession_names
+SCO_DIR=orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out_1/Single_Copy_Orthologue_Sequences
 
 basename=$(basename ${SCO_DIR})
 
@@ -37,7 +36,7 @@ while read orthogroup; do
         ${basename}_msas/${orthogroup}.msa
 done < sco_mapfile
 
-/global/scratch/users/pierrj/conda_envs/orthofinder/bin/python /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/concatenate_msas.py ${basename}_msas ${ACCESSIONS} ${basename}_msas_combined.fasta
+/global/scratch/users/pierrj/conda_envs/orthofinder/bin/python /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/concatenate_msas.py ${basename}_msas ${basename}_msas_combined.fasta
 
 module load trimal
 

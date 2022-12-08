@@ -53,4 +53,12 @@ done
 
 ## once finished
 
-sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/full_orthofinder_run.slurm
+sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/orthofinder_orthogrouping.slurm
+
+
+# now generate MSAs and make the tree using fasttree
+sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/generate_sco_msa.slurm
+
+## extract species tree here:
+## and root in ITOL and output as nwk
+
