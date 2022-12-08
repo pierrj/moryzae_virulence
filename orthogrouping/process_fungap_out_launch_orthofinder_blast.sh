@@ -1,6 +1,4 @@
 #!/bin/bash
-
-
 PROJECT_DIR=/global/scratch/users/pierrj/moryzae_virulence_project/orthogrouping
 
 cd $PROJECT_DIR
@@ -52,3 +50,7 @@ do
     echo $node
     sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal --job-name=$node.blast --export=ALL,node=$node /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/orthofinder_blast.slurm
 done
+
+## once finished
+
+sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/full_orthofinder_run.slurm
