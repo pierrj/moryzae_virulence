@@ -18,4 +18,4 @@ source activate /global/scratch/users/pierrj/conda_envs/orthofinder
 
 module purge
 
-orthofinder -oa -M msa -A mafft -T fasttree -t ${SLURM_NTASKS} -a ${SLURM_NTASKS} -b orthofinder_out/Results_out/WorkingDirectory
+orthofinder -oa -M msa -A mafft -T fasttree -t ${SLURM_NTASKS} -a ${SLURM_NTASKS} -n out -b orthofinder_out/Results_out/WorkingDirectory

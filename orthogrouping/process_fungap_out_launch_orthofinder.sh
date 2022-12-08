@@ -3,10 +3,6 @@ PROJECT_DIR=/global/scratch/users/pierrj/moryzae_virulence_project/orthogrouping
 
 cd $PROJECT_DIR
 
-module purge
-
-module load python
-
 conda activate /global/scratch/users/pierrj/conda_envs/orthofinder
 
 ## copy over fungap outputs and process
@@ -34,6 +30,10 @@ cp -r /global/scratch/users/pierrj/moryzae_virulence_project/genome_annotation/A
                                                                                                                                         all_gffs_processed \
                                                                                                                                         all_proteomes \
                                                                                                                                         all_proteomes_processed
+
+
+## copy over mgrisae proteome
+cp /global/scratch/users/pierrj/PAV_SV/PAV/re_gladieux_proteomes_fungap/all_proteomes_corrected/NI907_fungap_out_prot_filtered.faa all_proteomes_processed/
 
 orthofinder -op -S diamond_ultra_sens -f all_proteomes_processed -n out -o orthofinder_out | grep "diamond blastp" > jobqueue
 
