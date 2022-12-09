@@ -83,6 +83,8 @@ strain_names = [
 'VT0030']
 
 for strain in strain_names:
+    if strain == "IN0092":
+        continue
     genomes_dict[strain] = SeqRecord(Seq(""), id=strain)
 
 genomes_dict['NI907'] = SeqRecord(Seq(""), id='NI907')
