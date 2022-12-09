@@ -58,6 +58,7 @@ sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal 
 
 # now generate MSAs and make the tree using fasttree
 sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/generate_sco_msa.slurm
+sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/fasttree_scos.slurm
 
 ## extract species tree here:
 ## and root in ITOL and output as nwk
