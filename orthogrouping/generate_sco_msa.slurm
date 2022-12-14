@@ -22,19 +22,19 @@ SCO_DIR=orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out_1/S
 
 basename=$(basename ${SCO_DIR})
 
-ls ${SCO_DIR} > sco_mapfile
+# ls ${SCO_DIR} > sco_mapfile
 
-if [ -d "${basename}_msas" ]; then
-    rm -r ${basename}_msas
-fi
+# if [ -d "${basename}_msas" ]; then
+#     rm -r ${basename}_msas
+# fi
 
-mkdir ${basename}_msas
+# mkdir ${basename}_msas
 
-while read orthogroup; do
-    echo ${orthogroup}
-    mafft --maxiterate 1000 --globalpair --thread ${SLURM_NTASKS} ${SCO_DIR}/${orthogroup} > \
-        ${basename}_msas/${orthogroup}.msa
-done < sco_mapfile
+# while read orthogroup; do
+#     echo ${orthogroup}
+#     mafft --maxiterate 1000 --globalpair --thread ${SLURM_NTASKS} ${SCO_DIR}/${orthogroup} > \
+#         ${basename}_msas/${orthogroup}.msa
+# done < sco_mapfile
 
 /global/scratch/users/pierrj/conda_envs/orthofinder/bin/python /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/concatenate_msas.py ${basename}_msas ${basename}_msas_combined.fasta
 
