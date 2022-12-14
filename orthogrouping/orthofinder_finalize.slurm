@@ -22,6 +22,6 @@ SCO_DIR=orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out_1/S
 basename=$(basename ${SCO_DIR})
 
 orthofinder -fg orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out/ \
-            -S diamond_ultra_sens -A mafft -T fasttree \
+            -S diamond_ultra_sens -A mafft -T fasttree -M msa \
             -t ${SLURM_NTASKS} -a ${SLURM_NTASKS} -n out \
             -s ${basename}_msas_combined.trimmed.fasttree.rooted
