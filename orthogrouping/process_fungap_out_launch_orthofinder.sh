@@ -52,7 +52,6 @@ do
 done
 
 ## once finished
-
 sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/orthofinder_orthogrouping.slurm
 
 
@@ -61,5 +60,5 @@ sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal 
 sbatch -p savio4_htc -A co_minium --ntasks-per-node 56 --qos=minium_htc4_normal /global/scratch/users/pierrj/moryzae_virulence/orthogrouping/fasttree_scos.slurm
 
 ## extract species tree here:
-## and root in ITOL and output as nwk
+## and root in ITOL on NI907 and output as nwk
 

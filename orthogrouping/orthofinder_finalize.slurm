@@ -18,7 +18,10 @@ source activate /global/scratch/users/pierrj/conda_envs/orthofinder
 
 module purge
 
+SCO_DIR=orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out_1/Single_Copy_Orthologue_Sequences
+basename=$(basename ${SCO_DIR})
+
 orthofinder -fg orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out/ \
             -S diamond_ultra_sens -A mafft -T fasttree \
             -t ${SLURM_NTASKS} -a ${SLURM_NTASKS} -n out \
-            -s rooted_species_tree.nwk
+            -s ${basename}_msas_combined.trimmed.fasttree.rooted
