@@ -21,7 +21,7 @@ module purge
 SCO_DIR=orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out_1/Single_Copy_Orthologue_Sequences
 basename=$(basename ${SCO_DIR})
 
-orthofinder -fg orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out/ \
+orthofinder -fg orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out_1/WorkingDirectory \
             -S diamond_ultra_sens -A mafft -T fasttree -M msa \
             -t ${SLURM_NTASKS} -a ${SLURM_NTASKS} -n out \
             -s ${basename}_msas_combined.trimmed.fasttree.rooted
