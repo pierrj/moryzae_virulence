@@ -36,6 +36,8 @@ done
 #Proteins > 1000AA were skipped, as they were too large
 #I didn't search against the bfd database to save MSA computation time. 
 
+conda activate alphafold
+module load cuda/11.2
 export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
 export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
 prefix=$(less prefix.list | tr "\n" ",")
@@ -45,7 +47,12 @@ prefix=$(less prefix.list | tr "\n" ",")
 python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}
 python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.py ${prefix}
 
-
+#Alphafold was run with the following commend
+#for each {sequence}
+#This script also had slight modification to search against pdb_seqres.txt instead of pdb70_databases
+#To use recently available PDB structures as template
+python run_alphafold.py --fasta_paths=${sequence} --model_preset=monomer --db_preset=full_dbs --output_dir=. \
+                        --use_gpu_relax=True --use_precomputed_msas=True 
 
 #Download pre-generated structures for M. oryzae from the AlphaFold database
 #The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131
