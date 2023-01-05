@@ -8,8 +8,6 @@ data_dir = "/global/scratch/users/skyungyong/Software/alphafold/Database"
 uniref90_database_path = '/global/scratch/users/skyungyong/Software/alphafold/Database/uniref90/uniref90.fungalDB.added.fasta'
 mgnify_database_path = '/global/scratch/users/skyungyong/Software/alphafold/Database/mgnify/mgy_clusters.fa'
 
-mode        = 'else'
-
 # Takes a single fasta file as input. So run this function in the multi-threaded.
 
 def compute_msa(input_fasta_path,
