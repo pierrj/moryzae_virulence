@@ -3,6 +3,8 @@ import subprocess
 import multiprocessing
 from joblib import Parallel, delayed
 
+#This script is a modification of AF2 scripts
+#Paths to excutables and databases
 hhblits_binary_path = 'hhblits'
 bfd_database_path = '/global/scratch2/groups/fc_kvkallow/bfd/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt'
 uniclust30_database_path = '/global/scratch2/groups/fc_kvkallow/uniclust30/uniclust30_2018_08/uniclust30_2018_08'
@@ -10,19 +12,22 @@ uniclust30_database_path = '/global/scratch2/groups/fc_kvkallow/uniclust30/unicl
 def build_msa(item):
 
     os.chdir(item)
+    
+    #If MSA generation is not running in the current working directory
     if "alphafold.msa2.running" not in os.listdir(".") and "alphafold.msa2.done" not in os.listdir("."):
-        with open("alphafold.msa2.running", "w") as output_handle:
-            output_handle.write(" ")
 
+        #Mark running
+        with open("alphafold.msa2.running", "w") as o: o.write(" ")
+        
+        #Get the sequence
         fa = os.getcwd() + "/" + item + ".fasta"
-        msa_output_dir = os.path.join(os.getcwd() + "/" + item, 'msas')
-        if not os.path.exists(item):
-            os.mkdir(item)
-        os.chdir(item)
-        if not os.path.exists("msas"):
-            os.mkdir("msas")
-        os.chdir("msas")
 
+        #Generate the folders
+        if not os.path.exists(item): os.mkdir(item)
+        if not os.path.exists(f"{item}/msas"): os.mkdir(f"{item}/msas")
+        os.chdir(f"{item}/msas")
+
+        #Run HHblits
         cmd = [
           hhblits_binary_path,
           '-i', fa,
@@ -36,7 +41,9 @@ def build_msa(item):
           '-maxfilt', str(100000),
           '-min_prefilter_hits', str(1000)]
 
-        for db_path in [uniclust30_database_path]:  #[bfd_database_path, uniclust30_database_path]: #bfd_database_path, uniclust30_database_path
+        #Run search 
+        for db_path in [uniclust30_database_path]:  #Initially [bfd_database_path, uniclust30_database_path]: 
+                                                    #Skip bfd to save computation time
            cmd.append('-d')
            cmd.append(db_path)
 
@@ -45,9 +52,10 @@ def build_msa(item):
         p.wait()
 
         os.chdir("../..")
+
+        #Mark done 
+        with open("alphafold.msa2.done" , "w") as o: o.write("")
         os.remove("alphafold.msa2.running")
-        with open("alphafold.msa2.done" , "w") as output_handle:
-            output_handle.write("")
 
     os.chdir("..")
 
