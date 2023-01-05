@@ -36,10 +36,16 @@ done
 #Proteins > 1000AA were skipped, as they were too large
 #I didn't search against the bfd database to save MSA computation time. 
 
-export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
+export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
+export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
 prefix=$(less prefix.list | tr "\n" ",")
+
+#These two scripts to collect MSAs. These are simply modified scripts of AF2
+#These may or may not run independently of the AF2 packages (may need some more modificiation)
 python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}
-python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.multiple.py ${prefix}
+python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.py ${prefix}
+
+
 
 #Download pre-generated structures for M. oryzae from the AlphaFold database
 #The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131
