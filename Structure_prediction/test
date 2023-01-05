@@ -19,15 +19,39 @@ makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'
 blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 \
        -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out
 
+#Based on the BLAST outputs, decide whether I need to predict the structures
+#This will generate 'AF2.list' - there are already structures from the AF2 database
+#and 'Predict.list' - I need to predict the structures
+python choose_representative.py
+
+#Get each sequence into a new folder to set up for AF2
+#Rather use Biopython, since iterating for each sequence takes a while for the large fasta file....
+cd ../Structure
+less ../BLAST/Predict.list | awk '{print $2}' | sort -u | while read seq; do \
+       mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
+done
+
+#Predict the structures for these with alphafold
+#Proteins > 800AA were predicted with GPUs with high memory (A40 for instance)
+#Proteins > 1000AA were skipped, as they were too large
+#I didn't search against the bfd database to save MSA computation time. 
+
+export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
+prefix=$(less prefix.list | tr "\n" ",")
+python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}
+python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.multiple.py ${prefix}
 
 #Download pre-generated structures for M. oryzae from the AlphaFold database
 #The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131
 #This requires 'gsutil'
 
 cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2
-gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-*.tar .
-gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143189-*.tar .
-gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-*.tar .
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-*.tar .
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143189-*.tar .
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-*.tar .
 
 ls *.tar | while read tar; do tar xf $tar; done
 gunzip *.cif.gz
