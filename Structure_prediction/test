@@ -1,1 +1,34 @@
+#!/bin/bash
+
+#Donwload proteomes from Uniprot
+#70-15: https://www.uniprot.org/proteomes/UP000009058
+#P131 : https://www.uniprot.org/proteomes/UP000011085
+#Y34  : https://www.uniprot.org/proteomes/UP000011086
+
+#Concatnate the proteins from Uniprot
+cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta
+
+#Concate all M. oryzae protein annotation sets from our study
+cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa
+
+#Run Blast search against these two concatnated fasta files
+module load blast #v2.7.1+
+mkdir blastdb
+
+makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'
+blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 \
+       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out
+
+
+#Download pre-generated structures for M. oryzae from the AlphaFold database
+#The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131
+#This requires 'gsutil'
+
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-*.tar .
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143189-*.tar .
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-*.tar .
+
+ls *.tar | while read tar; do tar xf $tar; done
+gunzip *.cif.gz
 
