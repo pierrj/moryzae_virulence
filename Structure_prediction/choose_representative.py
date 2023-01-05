@@ -3,16 +3,20 @@ from collections import Counter
 
 def orthogroups():
   """Go through the OrthoFinder outputs and save the membership of each sequences
-    Also, pick a representative sequence per OG to predict the structure for    """
+    Also, pick a representative sequence per OG to predict the structure for  """
 
+  #Directories for the final orthogroup outputs 
   OG = "../orthogrouping/orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out_6/Phylogenetic_Hierarchical_Orthogroups/N0.tsv"
   UA = "../orthogrouping/orthofinder_out/Results_out/WorkingDirectory/OrthoFinder/Results_out_1/Orthogroups/Orthogroups_UnassignedGenes.tsv"
+
+  #Save all protein annotations into memory
   fasta_handle = SeqIO.to_dict(SeqIO.parse("Mo.fa", "fasta"))
 
   memberships = {}
   refseq      = {}
 
   with open(OG, "r") as f:
+    #Skip the first line
     next(f)
 
     for line in f:
@@ -20,6 +24,7 @@ def orthogroups():
       lengths = [ len(str(fasta_handle[m].seq)) for m in members ]
       o       = line.split()[0]
 
+      #Store the membership information
       #sequence ID = OG ID
       for m in members:
         memberships[m] = o
@@ -62,14 +67,13 @@ def check_blast(memberships, refseq):
   #use that structure. Otherwise, predict one per OG
 
   for line in open(BLAST, "r"):
+    
     #There are 19 sequences removed from phylogeny-based OGs by OrthoFinder
     #Igore them, since there are other informatic orthologs in the same OGs
-
     try:
       OG = memberships[ line.split()[1] ]
     except Exception:
       OG = "s"
-
 
     if not OG == "s":
       if float(line.split()[3]) >= 98: # sequence identity
@@ -86,10 +90,14 @@ def check_blast(memberships, refseq):
         if OG not in AF2:
           Predict[ OG ] = refseq[ OG ]
 
+  #This file will store a representative sequences per OG,
+  #the structure of which is already available in the AF2 database.
   with open("AF2.list", "w") as o:
      for a in AF2:
        o.write(f"{a}\t{AF2[a][0]}\t{AF2[a][1]}\n")
 
+  #This file will store a representative sequence per OG,
+  #the structure of which needs to be predicted. 
   with open("Predict.list", "w") as o:
      for a in Predict:
        o.write(f"{a}\t{Predict[a]}\n")
