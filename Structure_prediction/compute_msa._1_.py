@@ -2,28 +2,21 @@ import os, sys
 import subprocess
 import multiprocessing
 from joblib import Parallel, delayed
+from alphafold.data.tools import utils
+from alphafold.data import parsers
+from absl import logging
 
-# Paths to excutables and databases
-data_dir = "/global/scratch/users/skyungyong/Software/alphafold/Database"
+#This script is a modification of AF2 scripts
+#Paths to excutables and databases
 uniref90_database_path = '/global/scratch/users/skyungyong/Software/alphafold/Database/uniref90/uniref90.fungalDB.added.fasta'
 mgnify_database_path = '/global/scratch/users/skyungyong/Software/alphafold/Database/mgnify/mgy_clusters.fa'
+jackhmmer_binary_path = 'jackhmmer'
+
 
 # Takes a single fasta file as input. So run this function in the multi-threaded.
-
+# Run jackhmmer and return outputs
 def compute_msa(input_fasta_path,
-                msa_output_dir): # Run jackhmmer and hhsearch and return outputs
-
-    with open(input_fasta_path) as f:
-      input_fasta_str = f.read()
-
-    input_seqs, input_descs = parsers.parse_fasta(input_fasta_str)
-    if len(input_seqs) != 1:
-      raise ValueError(
-          'More than one input sequence found in ' + input_fasta_path)
-    input_sequence = input_seqs[0]
-    input_description = input_descs[0]
-    num_res = len(input_sequence)
-
+                msa_output_dir): 
     cmd_flags = [
           # Don't pollute stdout with Jackhmmer output.
           '-o', '/dev/null',
@@ -37,16 +30,16 @@ def compute_msa(input_fasta_path,
           '--cpu', str(1),
           '-N', str(1),
       ]
-
+    
+    # Run jackhmmer against uniref
     with utils.tmpdir_manager(base_dir='/tmp') as query_tmp_dir:
       sto_path = os.path.join(query_tmp_dir, 'output.uniref.sto')
 
-# Run jackhmmer against uniref
       cmd = [jackhmmer_binary_path] + cmd_flags + ['-A', sto_path] + [input_fasta_path, uniref90_database_path]
 
-      logging.info('Launching subprocess "%s"', ' '.join(cmd))
       process = subprocess.Popen(
           cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
       with utils.timing(
           f'Jackhmmer ({os.path.basename(uniref90_database_path)}) query'):
         _, stderr = process.communicate()
@@ -56,10 +49,9 @@ def compute_msa(input_fasta_path,
         raise RuntimeError(
             'Jackhmmer failed\nstderr:\n%s\n' % stderr.decode('utf-8'))
 
-    # Get e-values for each target name
+      # Get e-values for each target name
       tbl = ''
-      with open(sto_path) as f:
-       sto = f.read()
+      with open(sto_path) as f: sto = f.read()
 
       jackhmmer_uniref90_result = dict(
         sto=sto,
@@ -69,21 +61,20 @@ def compute_msa(input_fasta_path,
         e_value=0.0001)
 
       uniref90_out_path = os.path.join(msa_output_dir, 'uniref90_hits.sto')
-      with open(uniref90_out_path, 'w') as f:
-        f.write(jackhmmer_uniref90_result['sto'])
+      with open(uniref90_out_path, 'w') as f: f.write(jackhmmer_uniref90_result['sto'])
 
       uniref90_msa_as_a3m = parsers.convert_stockholm_to_a3m(
         jackhmmer_uniref90_result['sto'], max_sequences=10000)
 
-# Run jackhmmer against mgnify
-
+    # Run jackhmmer against mgnify
     with utils.tmpdir_manager(base_dir='/tmp') as query_tmp_dir:
       sto_path = os.path.join(query_tmp_dir, 'output.mgnify.sto')
+
       cmd = [jackhmmer_binary_path] + cmd_flags + ['-A', sto_path] + [input_fasta_path, mgnify_database_path]
 
-      logging.info('Launching subprocess "%s"', ' '.join(cmd))
       process = subprocess.Popen(
           cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+ 
       with utils.timing(
           f'Jackhmmer ({os.path.basename(mgnify_database_path)}) query'):
         _, stderr = process.communicate()
@@ -94,10 +85,9 @@ def compute_msa(input_fasta_path,
             'Jackhmmer failed\nstderr:\n%s\n' % stderr.decode('utf-8'))
 
 
-    # Get e-values for each target name
+      # Get e-values for each target name
       tbl = ''
-      with open(sto_path) as f:
-        sto = f.read()
+      with open(sto_path) as f: sto = f.read()
 
       jackhmmer_mgnify_result = dict(
         sto=sto,
@@ -107,8 +97,7 @@ def compute_msa(input_fasta_path,
         e_value=0.0001)
 
       mgnify_out_path = os.path.join(msa_output_dir, 'mgnify_hits.sto')
-      with open(mgnify_out_path, 'w') as f:
-        f.write(jackhmmer_mgnify_result['sto'])
+      with open(mgnify_out_path, 'w') as f: f.write(jackhmmer_mgnify_result['sto'])
 
 def msa_parallel(item):
     os.chdir(item)
