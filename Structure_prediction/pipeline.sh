@@ -5,6 +5,8 @@
 #P131 : https://www.uniprot.org/proteomes/UP000011085
 #Y34  : https://www.uniprot.org/proteomes/UP000011086
 
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST
+
 #Concatnate the proteins from Uniprot
 cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta
 
@@ -26,7 +28,7 @@ python choose_representative.py
 
 #Get each sequence into a new folder to set up for AF2
 #Rather use Biopython, since iterating for each sequence takes a while for the large fasta file....
-cd ../Structure
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures
 less ../BLAST/Predict.list | awk '{print $2}' | sort -u | while read seq; do \
        mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
 done
@@ -40,6 +42,8 @@ conda activate alphafold
 module load cuda/11.2
 export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
 export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
+
+ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list
 prefix=$(less prefix.list | tr "\n" ",")
 
 #These two scripts to collect MSAs. These are simply modified scripts of AF2
@@ -58,7 +62,7 @@ python run_alphafold.py --fasta_paths=${sequence} --model_preset=monomer --db_pr
 #The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131
 #This requires 'gsutil'
 
-cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-DB/AF2
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
        -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-*.tar .
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
@@ -68,4 +72,23 @@ gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analys
 
 ls *.tar | while read tar; do tar xf $tar; done
 gunzip *.cif.gz
+
+#I also need to collect MSAs for the sequences, the structures of which are available in the AF2 DB. 
+#Generate the same folder architecture and collect MSAs
+#Rather use Biopython, since iterating for each sequence takes a while for the large fasta file....
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-2
+less ../BLAST/AF2.list | awk '{print $3}' | sort -u | while read seq; do \
+       mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
+done
+
+#Generate MSAs
+conda activate alphafold
+export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
+export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
+
+ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list
+prefix=$(less prefix.list | tr "\n" ",")
+
+python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}
+python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.py ${prefix}
 
