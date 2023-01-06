@@ -14,6 +14,10 @@ cd /global/scratch/users/pierrj/moryzae_virulence_project/signalp
 
 ls /global/scratch/users/pierrj/moryzae_virulence_project/orthogrouping/all_proteomes_processed/ > mapfile
 
+if [ -d "jobqueue" ]; then
+    rm jobqueue
+fi
+
 while read file; do
     echo "/global/scratch/users/pierrj/signalp-4.1/signalp -t euk -u 0.34 -U 0.34 -f short /global/scratch/users/pierrj/moryzae_virulence_project/orthogrouping/all_proteomes_processed/$file > $file.signalp.out" >> jobqueue
 done < mapfile
