@@ -10,7 +10,7 @@
 #SBATCH --output=/global/home/users/pierrj/slurm_stdout/slurm-%j.out
 #SBATCH --error=/global/home/users/pierrj/slurm_stderr/slurm-%j.out
 
-PROJECT_DIR=/global/scratch/users/pierrj/moryzae_virulence_project
+PROJECT_DIR=/global/scratch/users/pierrj/moryzae_virulence_project/pav_validation
 cd $PROJECT_DIR
 
 CODE_DIRECTORY=/global/scratch/users/pierrj/moryzae_virulence_code/pav_validation/
@@ -28,7 +28,7 @@ BLAST_DB=${PROJECT_DIR}/all_ogs_seqs.fasta
 ABSENCES_FILE=absences_to_validate.txt
 JOBQUEUE_FILE=jobqueue_pav_validation
 
-conda activate /global/scratch/users/pierrj/conda_envs/orthofinder
+source activate /global/scratch/users/pierrj/conda_envs/orthofinder
 
 ## generate orthogroups to validate
 Rscript --vanilla $CODE_DIRECTORY/print_pavs_to_validate.r $ORTHOGROUPS_TSV $GENOME_SUFFIX absences_to_validate.txt
@@ -36,7 +36,10 @@ Rscript --vanilla $CODE_DIRECTORY/print_pavs_to_validate.r $ORTHOGROUPS_TSV $GEN
 # concatenate all orthogroup sequences together into one file and make blast db
 /global/scratch/users/pierrj/conda_envs/orthofinder/bin/python $CODE_DIRECTORY/make_single_file_from_og_dir.py ${LOST_OG_DIR} ${BLAST_DB}
 
+
 makeblastdb -in ${BLAST_DB} -dbtype prot
+
+
 
 if [ -d "${PROJECT_DIR}/pav_validation" ]; then
     rm -r ${PROJECT_DIR}/pav_validation
@@ -53,15 +56,15 @@ fi
 # validate missing ogs using tblastn and blastp
 while read -r LOST_GENOME LOST_OG; do
     echo $CODE_DIRECTORY/tblastn_validation.sh -l ${LOST_OG_DIR}/${LOST_OG}.fa -g ${LOST_GENOME_DIR}/${LOST_GENOME} \
-        -e ${E_VALUE} -p ${PIDENT} -q ${QUERY_COV} -c ${HIT_COUNT} -d ${BLAST_DB} -h $CODE_DIRECTORY >> jobqueue
+        -e ${E_VALUE} -p ${PIDENT} -q ${QUERY_COV} -c ${HIT_COUNT} -d ${BLAST_DB} -h ${CODE_DIRECTORY} >> jobqueue
 done < ${ABSENCES_FILE}
 
 if [ -f "${OUTPUT_FILE}" ]; then
     rm ${OUTPUT_FILE}
 fi
 
-if [ -f $jobqueue_file ]; then
-    rm $jobqueue_file
+if [ -f $JOBQUEUE_FILE ]; then
+    rm $JOBQUEUE_FILE
 fi
 
 # parallelization stuff
@@ -73,7 +76,7 @@ fi
 
 for node in $(seq -f "%02g" 1 ${N_NODES})
 do
-    sbatch --parsable -p savio2 --ntasks-per-node 24 --job-name=$node.tblastn_validation --export=node=$node,OUTPUT_FILE=$OUTPUT_FILE $CODE_DIRECTORY/gnu_parallel_multinode.slurm
+    sbatch --parsable -p savio2 --ntasks-per-node 24 --job-name=$node.tblastn_validation --export=node=$node,OUTPUT_FILE=$OUTPUT_FILE,JOBQUEUE_FILE=$JOBQUEUE_FILE $CODE_DIRECTORY/gnu_parallel_multinode.slurm
 done
 
 if [ -f slurm_ids ]; then
