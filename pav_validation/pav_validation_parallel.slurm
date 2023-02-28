@@ -31,7 +31,7 @@ JOBQUEUE_FILE=jobqueue_pav_validation
 source activate /global/scratch/users/pierrj/conda_envs/orthofinder
 
 ## generate orthogroups to validate
-Rscript --vanilla $CODE_DIRECTORY/print_pavs_to_validate.r $ORTHOGROUPS_TSV $GENOME_SUFFIX absences_to_validate.txt
+Rscript --vanilla $CODE_DIRECTORY/print_pavs_to_validate.r $ORTHOGROUPS_TSV $GENOME_SUFFIX $ABSENCES_FILE
 
 # concatenate all orthogroup sequences together into one file and make blast db
 /global/scratch/users/pierrj/conda_envs/orthofinder/bin/python $CODE_DIRECTORY/make_single_file_from_og_dir.py ${LOST_OG_DIR} ${BLAST_DB}
@@ -49,16 +49,6 @@ mkdir ${PROJECT_DIR}/pav_validation
 
 cd ${PROJECT_DIR}/pav_validation
 
-if [ -f "jobqueue" ]; then
-    rm jobqueue
-fi
-
-# validate missing ogs using tblastn and blastp
-while read -r LOST_GENOME LOST_OG; do
-    echo $CODE_DIRECTORY/tblastn_validation.sh -l ${LOST_OG_DIR}/${LOST_OG}.fa -g ${LOST_GENOME_DIR}/${LOST_GENOME} \
-        -e ${E_VALUE} -p ${PIDENT} -q ${QUERY_COV} -c ${HIT_COUNT} -d ${BLAST_DB} -h ${CODE_DIRECTORY} >> jobqueue
-done < ${ABSENCES_FILE}
-
 if [ -f "${OUTPUT_FILE}" ]; then
     rm ${OUTPUT_FILE}
 fi
@@ -66,6 +56,12 @@ fi
 if [ -f $JOBQUEUE_FILE ]; then
     rm $JOBQUEUE_FILE
 fi
+
+# validate missing ogs using tblastn and blastp
+while read -r LOST_GENOME LOST_OG; do
+    echo $CODE_DIRECTORY/tblastn_validation.sh -l ${LOST_OG_DIR}/${LOST_OG}.fa -g ${LOST_GENOME_DIR}/${LOST_GENOME} \
+        -e ${E_VALUE} -p ${PIDENT} -q ${QUERY_COV} -c ${HIT_COUNT} -d ${BLAST_DB} -h ${CODE_DIRECTORY} >> $JOBQUEUE_FILE
+done < ../${ABSENCES_FILE}
 
 # parallelization stuff
 split --number=l/${N_NODES} --numeric-suffixes=1 $JOBQUEUE_FILE ${JOBQUEUE_FILE}_
