@@ -6,10 +6,10 @@ We will predict or download a structure for a representative sequence in each cl
 P131 : https://www.uniprot.org/proteomes/UP000011085  
 Y34  : https://www.uniprot.org/proteomes/UP000011086  
 
-We will search our proteomes against these three strains'
-`cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST`
+We will search our proteomes against these three strains'  
+`cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST`  
 
-Concatnate the proteins from Uniprot
+Concatnate the proteins from Uniprot  
 `cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta`  
 
 Concate all M. oryzae protein annotation sets from our study  
@@ -21,12 +21,14 @@ Run Blast search against these two concatnated fasta files
 
 `makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'`  
 <code>blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 <br />  
-       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out<code \>
+       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out<code>
 
-#Based on the BLAST outputs, decide whether I need to predict the structures
-#This will generate 'AF2.list' - there are already structures from the AF2 database
-#and 'Predict.list' - I need to predict the structures
-python choose_representative.py
+Based on the BLAST outputs, decide whether we need to predict the structures. 
+`python choose_representative.py`       
+
+This will generate two files:  
+1) AF2.list: These sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage.
+2) Predict.list: The structures will be predicted.
 
 #Get each sequence into a new folder to set up for AF2
 #Rather use Biopython, since iterating for each sequence takes a while for the large fasta file....
