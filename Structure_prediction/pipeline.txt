@@ -1,4 +1,3 @@
-#!/bin/bash
 
 #Donwload proteomes from Uniprot
 #70-15: https://www.uniprot.org/proteomes/UP000009058
@@ -32,6 +31,14 @@ cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures
 less ../BLAST/Predict.list | awk '{print $2}' | sort -u | while read seq; do \
        mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
 done
+
+#In 'Predict.list' a few sequences contained 'X'. This won't allow the relaxation step to run. I replaced those sequences
+#BR0019_14_02091T0 -> replaced with gene_8576_NI907 (different length, no X)
+#BR0019_1_00155T0 -> replaced with gene_5088_NI907 (different length, no X)
+#BR0019_32_03871T0 -> replaced with gene_6814_NI907 (different length, no X)
+#CD0073_61_05782T0 -> replaced with CH0452_89_07103T0 (same length, no X)
+#CH0063_592_11157T0 -> replaced with CH0072_312_10461T0 (same length, no X)
+#CH0333_1_00001T0 -> Removed a single 'X' at the very end of the sequences
 
 #Predict the structures for these with alphafold
 #Proteins > 800AA were predicted with GPUs with high memory (A40 for instance)
@@ -92,3 +99,7 @@ prefix=$(less prefix.list | tr "\n" ",")
 python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}
 python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.py ${prefix}
 
+#Finally, for structures - regardless of they are predicted or downloaded - without plddt > 70,
+#check if omegafold can predict better structures.
+#for those sequences, omegafold was run as:
+omegafold --model 1 {fasta} {output}
