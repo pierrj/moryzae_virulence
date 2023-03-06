@@ -21,7 +21,7 @@ Run Blast search between these two concatnated fasta files
 
 `makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'`  
 <code>blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 <br />  
-       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out<code />
+       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out</code>
 
 Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures. 
 `python choose_representative.py`       
