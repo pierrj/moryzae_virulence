@@ -23,7 +23,7 @@ Run Blast search between these two concatnated fasta files
 <code>blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 <br />  
        -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out</code>
 
-Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures. 
+Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures.  
 `python choose_representative.py`       
 
 This will generate two files:  
@@ -32,18 +32,18 @@ This will generate two files:
 
 Later, we realized a few sequences in 'Predict.list' contained 'X'. This won't allow the relaxation step of Alphafold to run. These sequences were replaced as below:
 
-BR0019_14_02091T0  -> replaced with gene_8576_NI907 (different length, no X)
-BR0019_1_00155T0   -> replaced with gene_5088_NI907 (different length, no X)
-BR0019_32_03871T0  -> replaced with gene_6814_NI907 (different length, no X)
-CD0073_61_05782T0  -> replaced with CH0452_89_07103T0 (same length, no X)
-CH0063_592_11157T0 -> replaced with CH0072_312_10461T0 (same length, no X)
-CH0333_1_00001T0   -> Removed a single 'X' at the very end of the sequences
+BR0019_14_02091T0  -> replaced with gene_8576_NI907 (different length, no X)  
+BR0019_1_00155T0   -> replaced with gene_5088_NI907 (different length, no X)  
+BR0019_32_03871T0  -> replaced with gene_6814_NI907 (different length, no X)  
+CD0073_61_05782T0  -> replaced with CH0452_89_07103T0 (same length, no X)  
+CH0063_592_11157T0 -> replaced with CH0072_312_10461T0 (same length, no X)  
+CH0333_1_00001T0   -> Removed a single 'X' at the very end of the sequences  
        
 Get each sequence into a new folder to set up for AF2. For this iteration, using Biopython will be much faster instead of what is given here.
 `cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures`
 <code>less ../BLAST/Predict.list | awk '{print $2}' | sort -u | while read seq; do \
 &emsp;&emsp;mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
-done<code />  
+done</code>  
 
 Predict the structures for these with alphafold. Proteins > 800 AA were predicted with GPUs with high memory - e.g. A40. All proteins > 1000 AA were skipped, as they were too large. Moreover, to reduce computing time to generate the MSAs, we didn't search against the bfd database.   
 
@@ -57,8 +57,8 @@ Predict the structures for these with alphafold. Proteins > 800 AA were predicte
 
 #These two scripts to collect MSAs. These are simply modified scripts of AF2
 #These may or may not run independently of the AF2 packages (may need some more modificiation)
-`python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}`
-`python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.py ${prefix}`
+`python compute_msa._1_.py ${prefix}`
+`python compute_msa._2_.py ${prefix}`
 
 #Alphafold was run with the following commend
 #for each {sequence}
