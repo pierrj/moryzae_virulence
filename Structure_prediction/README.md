@@ -1,6 +1,6 @@
 # Structure prediction
 
-We will predict or download a structure for a representative sequence in each cluster. DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. First, donwload proteomes from Uniprot.  
+We will predict or download a structure for a representative sequence in each cluster. DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. If our strains' proteins have good matches in this database, we can skip the prediction. First, donwload proteomes from Uniprot.  
 
 70-15: https://www.uniprot.org/proteomes/UP000009058  
 P131 : https://www.uniprot.org/proteomes/UP000011085  
@@ -13,55 +13,52 @@ Concatnate the proteins from Uniprot
 `cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta`  
 
 Concate all M. oryzae protein annotation sets from our study  
-cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa  
+`cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa`  
 
-Run Blast search against these two concatnated fasta files 
+Run Blast search between these two concatnated fasta files  
 `module load blast #v2.7.1+`  
 `mkdir blastdb`  
 
 `makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'`  
 <code>blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 <br />  
-       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out<code>
+       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out<code />
 
-Based on the BLAST outputs, decide whether we need to predict the structures. 
+Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures. 
 `python choose_representative.py`       
 
 This will generate two files:  
-1) AF2.list: These sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage.
-2) Predict.list: The structures will be predicted.
+1) AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage.
+2) Predict.list: These 5299 structures will be predicted.
 
-#Get each sequence into a new folder to set up for AF2
-#Rather use Biopython, since iterating for each sequence takes a while for the large fasta file....
-cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures
-less ../BLAST/Predict.list | awk '{print $2}' | sort -u | while read seq; do \
-       mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
-done
+Later, we realized a few sequences in 'Predict.list' contained 'X'. This won't allow the relaxation step of Alphafold to run. These sequences were replaced as below:
 
-#In 'Predict.list' a few sequences contained 'X'. This won't allow the relaxation step to run. I replaced those sequences
-#BR0019_14_02091T0 -> replaced with gene_8576_NI907 (different length, no X)
-#BR0019_1_00155T0 -> replaced with gene_5088_NI907 (different length, no X)
-#BR0019_32_03871T0 -> replaced with gene_6814_NI907 (different length, no X)
-#CD0073_61_05782T0 -> replaced with CH0452_89_07103T0 (same length, no X)
-#CH0063_592_11157T0 -> replaced with CH0072_312_10461T0 (same length, no X)
-#CH0333_1_00001T0 -> Removed a single 'X' at the very end of the sequences
+BR0019_14_02091T0  -> replaced with gene_8576_NI907 (different length, no X)
+BR0019_1_00155T0   -> replaced with gene_5088_NI907 (different length, no X)
+BR0019_32_03871T0  -> replaced with gene_6814_NI907 (different length, no X)
+CD0073_61_05782T0  -> replaced with CH0452_89_07103T0 (same length, no X)
+CH0063_592_11157T0 -> replaced with CH0072_312_10461T0 (same length, no X)
+CH0333_1_00001T0   -> Removed a single 'X' at the very end of the sequences
+       
+Get each sequence into a new folder to set up for AF2. For this iteration, using Biopython will be much faster instead of what is given here.
+`cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures`
+<code>less ../BLAST/Predict.list | awk '{print $2}' | sort -u | while read seq; do \
+&emsp;&emsp;mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
+done<code />  
 
-#Predict the structures for these with alphafold
-#Proteins > 800AA were predicted with GPUs with high memory (A40 for instance)
-#Proteins > 1000AA were skipped, as they were too large
-#I didn't search against the bfd database to save MSA computation time. 
+Predict the structures for these with alphafold. Proteins > 800 AA were predicted with GPUs with high memory - e.g. A40. All proteins > 1000 AA were skipped, as they were too large. Moreover, to reduce computing time to generate the MSAs, we didn't search against the bfd database.   
 
-conda activate alphafold
-module load cuda/11.2
-export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
-export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
+`conda activate alphafold`  
+`module load cuda/11.2`  
+`export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin`   
+`export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts`  
 
-ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list
-prefix=$(less prefix.list | tr "\n" ",")
+`ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list`  
+`prefix=$(less prefix.list | tr "\n" ",")`  
 
 #These two scripts to collect MSAs. These are simply modified scripts of AF2
 #These may or may not run independently of the AF2 packages (may need some more modificiation)
-python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}
-python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.py ${prefix}
+`python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}`
+`python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.py ${prefix}`
 
 #Alphafold was run with the following commend
 #for each {sequence}
