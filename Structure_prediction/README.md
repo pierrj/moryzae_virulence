@@ -1,10 +1,11 @@
+We will predict or download a structure for a representative sequence in each cluster.
 
-#Donwload proteomes from Uniprot
-#70-15: https://www.uniprot.org/proteomes/UP000009058
-#P131 : https://www.uniprot.org/proteomes/UP000011085
-#Y34  : https://www.uniprot.org/proteomes/UP000011086
+DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. First, donwload proteomes from Uniprot  
+70-15: https://www.uniprot.org/proteomes/UP000009058  
+P131 : https://www.uniprot.org/proteomes/UP000011085  
+Y34  : https://www.uniprot.org/proteomes/UP000011086  
 
-`cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST`
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST
 
 #Concatnate the proteins from Uniprot
 cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta
