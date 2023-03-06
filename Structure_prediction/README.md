@@ -1,25 +1,27 @@
-We will predict or download a structure for a representative sequence in each cluster.
+# Structure prediction
 
-DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. First, donwload proteomes from Uniprot  
+We will predict or download a structure for a representative sequence in each cluster. DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. First, donwload proteomes from Uniprot.  
+
 70-15: https://www.uniprot.org/proteomes/UP000009058  
 P131 : https://www.uniprot.org/proteomes/UP000011085  
 Y34  : https://www.uniprot.org/proteomes/UP000011086  
 
-cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST
+We will search our proteomes against these three strains'
+`cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST`
 
-#Concatnate the proteins from Uniprot
-cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta
+Concatnate the proteins from Uniprot
+`cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta`  
 
-#Concate all M. oryzae protein annotation sets from our study
-cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa
+Concate all M. oryzae protein annotation sets from our study  
+cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa  
 
-#Run Blast search against these two concatnated fasta files
-module load blast #v2.7.1+
-mkdir blastdb
+Run Blast search against these two concatnated fasta files 
+`module load blast #v2.7.1+`  
+`mkdir blastdb`  
 
-makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'
-blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 \
-       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out
+`makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'`  
+<code>blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 <br />  
+       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out<code \>
 
 #Based on the BLAST outputs, decide whether I need to predict the structures
 #This will generate 'AF2.list' - there are already structures from the AF2 database
