@@ -1,7 +1,8 @@
 # Structure prediction
 
-We will predict or download a structure for a representative sequence in each cluster. DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. If our strains' proteins have good matches in this database, we can skip the prediction. First, donwload proteomes from Uniprot.  
+We will predict or download a structure for a representative sequence in each cluster. DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. If our strains' proteins have good matches in this database, we can skip the prediction. Otherwise, we will predict the structures.  
 
+First, donwload proteomes from Uniprot.  
 70-15: https://www.uniprot.org/proteomes/UP000009058  
 P131 : https://www.uniprot.org/proteomes/UP000011085  
 Y34  : https://www.uniprot.org/proteomes/UP000011086  
@@ -16,21 +17,18 @@ Concate all M. oryzae protein annotation sets from our study
 `cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa`  
 
 Run Blast search between these two concatnated fasta files  
-`module load blast #v2.7.1+`  
-`mkdir blastdb`  
-
-`makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'`  
-<code>blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 <br />  
+<code>module load blast #v2.7.1+ <br \>  
+mkdir blastdb  <br \>
+makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'  <br \>
+blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10 <br />  
        -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out</code>
 
 Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures.  
 `python choose_representative.py`       
 
-This will generate two files:  
-1) AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage.
-2) Predict.list: These 5299 structures will be predicted.
+This will generate two files: [1] AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage; [2] Predict.list: These 5299 structures will be predicted.
 
-Later, we realized a few sequences in 'Predict.list' contained 'X'. This won't allow the relaxation step of Alphafold to run. These sequences were replaced as below:
+Later, we realized a few sequences in 'Predict.list' contained unknown sequence 'X'. This won't allow the relaxation step of Alphafold to run. These sequences had to be replaced as below:
 
 BR0019_14_02091T0  -> replaced with gene_8576_NI907 (different length, no X)  
 BR0019_1_00155T0   -> replaced with gene_5088_NI907 (different length, no X)  
