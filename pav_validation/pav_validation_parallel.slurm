@@ -72,7 +72,7 @@ fi
 
 for node in $(seq -f "%02g" 1 ${N_NODES})
 do
-    sbatch --parsable -p savio2 --ntasks-per-node 24 --job-name=$node.tblastn_validation --export=node=$node,OUTPUT_FILE=$OUTPUT_FILE,JOBQUEUE_FILE=$JOBQUEUE_FILE $CODE_DIRECTORY/gnu_parallel_multinode.slurm
+    sbatch --parsable -p savio2 --ntasks-per-node 24 --job-name=$node.tblastn_validation --export=node=$node,OUTPUT_FILE=$OUTPUT_FILE,JOBQUEUE_FILE=$JOBQUEUE_FILE $CODE_DIRECTORY/gnu_parallel_multinode.slurm >> slurm_ids
 done
 
 if [ -f slurm_ids ]; then
