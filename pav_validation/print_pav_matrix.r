@@ -39,7 +39,7 @@ df[] <- lapply(df, function(x) as.numeric(x))
 
 ## add back OG names
 
-df_ogs <- data.frame(fread('Orthogroups.tsv', na.strings = ''))
+df_ogs <- data.frame(fread(args[1], na.strings = ''))
 
 rownames(df) <- df_ogs$Orthogroup
 

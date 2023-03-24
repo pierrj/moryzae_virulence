@@ -27,6 +27,7 @@ OUTPUT_FILE=${PROJECT_DIR}/pav_table
 BLAST_DB=${PROJECT_DIR}/all_ogs_seqs.fasta
 ABSENCES_FILE=absences_to_validate.txt
 JOBQUEUE_FILE=jobqueue_pav_validation
+PAV_MATRIX=pav_matrix.txt
 
 source activate /global/scratch/users/pierrj/conda_envs/orthofinder
 
@@ -83,3 +84,5 @@ fi
 
 ## after everything is done, remove verbose outputs
 awk -v OFS='\t' '{ if ($3 == "yes") {print $1, $2, $3} else {print $1, $2, "no"}}' ${OUTPUT_FILE} > ${OUTPUT_FILE}.simplified
+
+Rscript --vanilla $CODE_DIRECTORY/print_pav_matrix.r $ORTHOGROUPS_TSV $GENOME_SUFFIX ${OUTPUT_FILE}.simplified $PAV_MATRIX
