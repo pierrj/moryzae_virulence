@@ -48,12 +48,12 @@ Download pre-generated structures for M. oryzae from the AlphaFold database. The
 ```
 cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-DB/AF2  
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
-       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-\*.tar .  
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-*.tar .  
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
-       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143189-\*.tar .  
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143189-*.tar .  
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
-       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-\*.tar .  
-ls \*.tar | while read tar; do tar xf $tar; done
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-*.tar .  
+ls *.tar | while read tar; do tar xf $tar; done
 gunzip *.cif.gz
 ```
 
