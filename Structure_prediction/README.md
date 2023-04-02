@@ -3,12 +3,14 @@
 ## AlphaFold
 We will predict or download a structure for a representative sequence in each cluster. DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. If our strains' proteins have good matches in this database, we can skip the prediction. Otherwise, we will predict the structures.  
 
+### Downloading existing structures  
+
 First, donwload proteomes from Uniprot.  
 70-15: https://www.uniprot.org/proteomes/UP000009058  
 P131 : https://www.uniprot.org/proteomes/UP000011085  
 Y34  : https://www.uniprot.org/proteomes/UP000011086  
 
-We will search our proteomes against these three strains'  
+We will search the annotation sets of our 70 strains against these three strains'  
 `cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST`  
 
 Concatnate the proteins from Uniprot  
@@ -18,21 +20,56 @@ Concate all M. oryzae protein annotation sets from our study
 `cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa`  
 
 Run Blast search between these two concatnated fasta files  
-<code>
-module load blast #v2.7.1+   
+<code>module load blast #v2.7.1+   
 mkdir blastdb  
 makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'  
 blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10  
-       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out
-</code>
+       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out</code>
 
 Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures.  
 `python choose_representative.py`       
 
 This will generate two files:  
-[1] AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded. 
-[2] Predict.list: These 5299 structures will be predicted with AlphaFold v2.2.2.
+[1] AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded.  
+[2] Predict.list: These 5299 structures will be predicted with AlphaFold v2.2.2.  
 
+Download pre-generated structures for M. oryzae from the AlphaFold database. The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131. This requires 'gsutil'
+
+<code>cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-DB/AF2  
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-*.tar .  
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143189-*.tar .  
+gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
+       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-*.tar .  
+ls *.tar | while read tar; do tar xf $tar; done
+gunzip *.cif.gz  <\code>
+
+
+Although we did not predict the structures for these sequences, we still generated their sequence profiles for sequence similarity searches at the clustering step. These sequence profiles are converted from the MSAs that come from AlphaFold.  
+       
+First, get the primary sequences and make a folder for each sequence to store outputs. Biopython should be faster than the code below.  
+<code>cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-2
+less ../BLAST/AF2.list | awk '{print $3}' | sort -u | while read seq; do \
+       mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
+done  <\code>
+
+Then, generate MSA. 
+       
+<code>export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
+export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
+
+ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list  
+prefix=$(less prefix.list | tr "\n" ",")  
+
+python compute_msa._1_.py ${prefix}    
+python compute_msa._2_.py ${prefix}       <\code>
+     
+       
+       
+### Predicting protein structures  
+
+       
 Later, we realized a few sequences in 'Predict.list' contained unknown sequence 'X'. This won't allow the relaxation step of Alphafold to run. These sequences had to be replaced as below:
 
 BR0019_14_02091T0  -> replaced with gene_8576_NI907 (different length, no X)  
@@ -69,39 +106,7 @@ To use recently available PDB structures as template
 python run_alphafold.py --fasta_paths=${sequence} --model_preset=monomer --db_preset=full_dbs --output_dir=. \
                         --use_gpu_relax=True --use_precomputed_msas=True 
 
-Download pre-generated structures for M. oryzae from the AlphaFold database
-The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131
-This requires 'gsutil'
 
-<code>cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-DB/AF2  
-gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
-       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-*.tar .  
-gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
-       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143189-*.tar .  
-gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
-       -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-*.tar .<\code>
-
-ls *.tar | while read tar; do tar xf $tar; done
-gunzip *.cif.gz
-
-#I also need to collect MSAs for the sequences, the structures of which are available in the AF2 DB. 
-#Generate the same folder architecture and collect MSAs
-#Rather use Biopython, since iterating for each sequence takes a while for the large fasta file....
-cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-2
-less ../BLAST/AF2.list | awk '{print $3}' | sort -u | while read seq; do \
-       mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
-done
-
-#Generate MSAs
-conda activate alphafold
-export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
-export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
-
-ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list
-prefix=$(less prefix.list | tr "\n" ",")
-
-python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._1_.py ${prefix}
-python /global/scratch/users/skyungyong/Software/alphafold-no-change_102522/alphafold/compute_msa._2_.py ${prefix}
 
 ##ESMfold 
 Finally, for structures - regardless of they are predicted or downloaded - without plddt > 70,
