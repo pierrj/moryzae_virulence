@@ -42,8 +42,8 @@ gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analys
        -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143189-\*.tar .  
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
        -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-\*.tar .  
-ls *.tar | while read tar; do tar xf $tar; done
-gunzip *.cif.gz<\code>
+ls \*.tar | while read tar; do tar xf $tar; done
+gunzip *.cif.gz</code>
 
 
 We will generate folders to store any outputs associated with sequences in AF2.list. Biopython should be faster than the code below.  
