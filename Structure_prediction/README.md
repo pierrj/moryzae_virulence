@@ -3,7 +3,7 @@
 ## AlphaFold
 We will predict or download a structure for a representative sequence in each cluster. DeepMind's alphafold database hosts predicted structures for 70-15, P131 and Y34 strains. If our strains' proteins have good matches in this database, we can skip the prediction. Otherwise, we will predict the structures.  
 
-### Downloading existing structures  
+### Using existing structures  
 
 First, donwload proteomes from Uniprot.  
 70-15: https://www.uniprot.org/proteomes/UP000009058  
@@ -33,7 +33,7 @@ This will generate two files:
 [1] AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded.  
 [2] Predict.list: These 5299 structures will be predicted with AlphaFold v2.2.2.  
 
-Download pre-generated structures for M. oryzae from the AlphaFold database. The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131. This requires 'gsutil'
+Download pre-generated structures for M. oryzae from the AlphaFold database. The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131. This requires 'gsutil'.
 
 <code>cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-DB/AF2  
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
@@ -46,15 +46,16 @@ ls *.tar | while read tar; do tar xf $tar; done
 gunzip *.cif.gz  <\code>
 
 
-Although we did not predict the structures for these sequences, we still generated their sequence profiles for sequence similarity searches at the clustering step. These sequence profiles are converted from the MSAs that come from AlphaFold.  
-       
-First, get the primary sequences and make a folder for each sequence to store outputs. Biopython should be faster than the code below.  
+We will generate folders to store any outputs associated with sequences in AF2.list. Biopython should be faster than the code below.  
 <code>cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-2
-less ../BLAST/AF2.list | awk '{print $3}' | sort -u | while read seq; do \
-       mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
-done  <\code>
+less AF2.list | awk '{print $3}' | sort -u | while read seq; do \
+     mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
+done<\code>
 
-Then, generate MSA. 
+Convert the cif files into pdb files and store in each directory.
+`python cif2pdb.py`
+
+Although we will not predict the structures for these sequences, we still need to generate their sequence profiles for sequence similarity searches at the clustering step. These sequence profiles are converted from the MSAs that come from AlphaFold, so let's run the MSA generation step. 
        
 <code>export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
 export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
@@ -63,7 +64,7 @@ ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list
 prefix=$(less prefix.list | tr "\n" ",")  
 
 python compute_msa._1_.py ${prefix}    
-python compute_msa._2_.py ${prefix}       <\code>
+python compute_msa._2_.py ${prefix}<\code>
      
        
        
