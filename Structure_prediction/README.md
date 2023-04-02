@@ -50,17 +50,14 @@ We will generate folders to store any outputs associated with sequences in AF2.l
 <code>cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-2
 less AF2.list | awk '{print $3}' | sort -u | while read seq; do \
      mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
-done<\code>
+done</code>
 
 Convert the cif files into pdb files and store in each directory.
 `python cif2pdb.py`
 
 Although we will not predict the structures for these sequences, we still need to generate their sequence profiles for sequence similarity searches at the clustering step. These sequence profiles are converted from the MSAs that come from AlphaFold, so let's run the MSA generation step. 
        
-<code>export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin
-export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts
-
-ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list  
+<code>less AF2.list | awk '{print $3}' | cut -d "_" -f 1 | sort -u > prefix.list  
 prefix=$(less prefix.list | tr "\n" ",")  
 
 python compute_msa._1_.py ${prefix}    
@@ -85,11 +82,7 @@ done</code>
 
 Predict the structures for these with alphafold. Proteins > 800 AA were predicted with GPUs with high memory - e.g. A40. All proteins > 1000 AA were skipped, as they were too large. Moreover, to reduce computing time for the MSA generation, we didn't search against the bfd database.   
 
-<code>module load cuda/11.2    
-export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin  
-export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts  
-
-ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list    
+<code>less Predict.list | awk '{print $2}' | cut -d "_" -f 1 | sort -u > prefix.list    
 prefix=$(less prefix.list | tr "\n" ",")<\code>
 
 Collect the MSAs first. 
