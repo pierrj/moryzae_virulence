@@ -34,15 +34,19 @@ blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 5
 ```
 
 Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures.  
-```python choose_representative.py```  
+```
+python choose_representative.py
+```  
 
 This will generate two files:  
 [1] AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded.  
+
 [2] Predict.list: These 5299 structures will be predicted with AlphaFold v2.2.2.  
 
 Download pre-generated structures for M. oryzae from the AlphaFold database. The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131. This requires 'gsutil'.
 
-<code>cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-DB/AF2  
+```
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-DB/AF2  
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
        -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-242507-\*.tar .  
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
@@ -50,26 +54,31 @@ gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analys
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
        -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-\*.tar .  
 ls \*.tar | while read tar; do tar xf $tar; done
-gunzip *.cif.gz</code>
+gunzip *.cif.gz
+```
 
 
 We will generate folders to store any outputs associated with sequences in AF2.list. Biopython should be faster than the code below.  
-<code>cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-2
+```
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures-2
 less AF2.list | awk '{print $3}' | sort -u | while read seq; do \
      mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
-done</code>
+done
+```
 
 Convert the cif files into pdb files and store in each directory.  
-`python cif2pdb.py`
+```
+python cif2pdb.py
+```
 
 Although we will not predict the structures for these sequences, we still need to generate their sequence profiles for sequence similarity searches at the clustering step. These sequence profiles are converted from the MSAs that come from AlphaFold, so let's run the MSA generation step. 
-       
-`less AF2.list | awk '{print $3}' | cut -d "_" -f 1 | sort -u > prefix.list`  
-`prefix=$(less prefix.list | tr "\n" ",")`    
 
-`python compute_msa._1_.py ${prefix}`    
-`python compute_msa._2_.py ${prefix}`
-       
+```
+less AF2.list | awk '{print $3}' | cut -d "_" -f 1 | sort -u > prefix.list  
+prefix=$(less prefix.list | tr "\n" ",")    
+python compute_msa._1_.py ${prefix}    
+python compute_msa._2_.py ${prefix}
+```       
 ### Predicting protein structures  
 
 We will predict 5299 sequences in Predict.list. It turned out a few sequences in this list have unknown amino acid sequence 'X', which causes issues in the relaxation step of AlphaFold. Let's replace them. 
