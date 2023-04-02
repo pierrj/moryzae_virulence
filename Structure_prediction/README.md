@@ -74,7 +74,7 @@ CD0073_61_05782T0  -> replaced with CH0452_89_07103T0 (same length, no X)
 CH0063_592_11157T0 -> replaced with CH0072_312_10461T0 (same length, no X)  
 CH0333_1_00001T0   -> Removed a single 'X' at the very end of the sequences  
        
-Get each sequence into a new folder to set up for AF2. For this iteration, using Biopython will be much faster instead of what is given here.
+Get each sequence into a new folder to set up for AF2. For this iteration, using Biopython will be much faster instead of what is given here.  
 `cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures`  
 <code>less Predict.list | awk '{print $2}' | sort -u | while read seq; do \
 &emsp;&emsp;mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
@@ -85,16 +85,15 @@ Predict the structures for these with alphafold. Proteins > 800 AA were predicte
 `less Predict.list | awk '{print $2}' | cut -d "_" -f 1 | sort -u > prefix.list`    
 `prefix=$(less prefix.list | tr "\n" ",")`
 
-Collect the MSAs first. 
+Collect the MSAs first.  
 `python compute_msa._1_.py ${prefix}`  
 `python compute_msa._2_.py ${prefix}`
 
 Alphafold was run with the following commend for each {sequence}. This script also had slight modification to search against pdb_seqres.txt instead of pdb70_databases to use recently available PDB structures as template.
-`python run_alphafold.py --fasta_paths=${sequence} --model_preset=monomer --db_preset=full_dbs --output_dir=. \
-                        --use_gpu_relax=True --use_precomputed_msas=True`  
+`python run_alphafold.py --fasta_paths=${sequence} --model_preset=monomer --db_preset=full_dbs --output_dir=. --use_gpu_relax=True --use_precomputed_msas=True`  
 
 
 
-##ESMfold 
+##ESMfold  
 Finally, we will try to predict the structures with ESMfold which alphafold failed to model. If the plddt is not > 70, get the sequence and run ESMfold. ESMfold was run through Google Colab. Check out esmfold.ipynb. 
       
