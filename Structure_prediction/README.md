@@ -43,7 +43,7 @@ gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analys
 gsutil -o "GSUtil:state_dir=/global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures/AF2" \
        -m cp gs://public-datasets-deepmind-alphafold/proteomes/proteome-tax_id-1143193-*.tar .  
 ls *.tar | while read tar; do tar xf $tar; done
-gunzip *.cif.gz  <\code>
+gunzip *.cif.gz<\code>
 
 
 We will generate folders to store any outputs associated with sequences in AF2.list. Biopython should be faster than the code below.  
@@ -65,14 +65,11 @@ prefix=$(less prefix.list | tr "\n" ",")
 
 python compute_msa._1_.py ${prefix}    
 python compute_msa._2_.py ${prefix}<\code>
-     
-       
        
 ### Predicting protein structures  
 
+We will predict 5299 sequences in Predict.list. It turned out a few sequences in this list have unknown amino acid sequence 'X', which causes issues in the relaxation step of AlphaFold. Let's replace them. 
        
-Later, we realized a few sequences in 'Predict.list' contained unknown sequence 'X'. This won't allow the relaxation step of Alphafold to run. These sequences had to be replaced as below:
-
 BR0019_14_02091T0  -> replaced with gene_8576_NI907 (different length, no X)  
 BR0019_1_00155T0   -> replaced with gene_5088_NI907 (different length, no X)  
 BR0019_32_03871T0  -> replaced with gene_6814_NI907 (different length, no X)  
@@ -82,35 +79,29 @@ CH0333_1_00001T0   -> Removed a single 'X' at the very end of the sequences
        
 Get each sequence into a new folder to set up for AF2. For this iteration, using Biopython will be much faster instead of what is given here.
 `cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures`  
-<code>less ../BLAST/Predict.list | awk '{print $2}' | sort -u | while read seq; do \
+<code>less Predict.list | awk '{print $2}' | sort -u | while read seq; do \
 &emsp;&emsp;mkdir ${seq} && awk -v seq=$seq -v RS=">" '$1 == seq {print RS $0; exit}' ../BLAST/Mo.fa > ${seq}\/${seq}\.fasta; \
 done</code>  
 
 Predict the structures for these with alphafold. Proteins > 800 AA were predicted with GPUs with high memory - e.g. A40. All proteins > 1000 AA were skipped, as they were too large. Moreover, to reduce computing time for the MSA generation, we didn't search against the bfd database.   
 
-`conda activate alphafold`  
-`module load cuda/11.2`  
-`export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin`   
-`export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts`  
+<code>module load cuda/11.2    
+export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/bin  
+export PATH=$PATH:/global/scratch/users/skyungyong/Software/alphafold-msa/hh-suite-3.3.0/build/scripts  
 
-`ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list`  
-`prefix=$(less prefix.list | tr "\n" ",")`  
+ls -d * | grep -e "T0" -e "gene" | cut -d "_" -f 1 | sort -u > prefix.list    
+prefix=$(less prefix.list | tr "\n" ",")<\code>
 
-These two scripts to collect MSAs. These are simply modified scripts of AF2
-These may or may not run independently of the AF2 packages (may need some more modificiation)
+Collect the MSAs first. 
 `python compute_msa._1_.py ${prefix}`  
 `python compute_msa._2_.py ${prefix}`
 
-Alphafold was run with the following commend for each {sequence}
-This script also had slight modification to search against pdb_seqres.txt instead of pdb70_databases
-To use recently available PDB structures as template
-python run_alphafold.py --fasta_paths=${sequence} --model_preset=monomer --db_preset=full_dbs --output_dir=. \
-                        --use_gpu_relax=True --use_precomputed_msas=True 
+Alphafold was run with the following commend for each {sequence}. This script also had slight modification to search against pdb_seqres.txt instead of pdb70_databases to use recently available PDB structures as template.
+`python run_alphafold.py --fasta_paths=${sequence} --model_preset=monomer --db_preset=full_dbs --output_dir=. \
+                        --use_gpu_relax=True --use_precomputed_msas=True`  
 
 
 
 ##ESMfold 
-Finally, for structures - regardless of they are predicted or downloaded - without plddt > 70,
-#check if omegafold can predict better structures.
-#for those sequences, omegafold was run as:
-omegafold --model 1 {fasta} {output}
+Finally, we will try to predict the structures with ESMfold which alphafold failed to model. If the plddt is not > 70, get the sequence and run ESMfold. ESMfold was run through Google Colab. Check out esmfold.ipynb. 
+      
