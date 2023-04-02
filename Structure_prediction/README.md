@@ -11,23 +11,30 @@ P131 : https://www.uniprot.org/proteomes/UP000011085
 Y34  : https://www.uniprot.org/proteomes/UP000011086  
 
 We will search the annotation sets of our 70 strains against these three strains'  
-`cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST`  
+```
+cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/BLAST
+```
 
 Concatnate the proteins from Uniprot  
-`cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta`  
+```
+cat uniprot-compressed_true_download_true_format_fasta_query__28_28prote-2022.12.19-21.3* > uniprot.ref.fasta
+```
 
 Concate all M. oryzae protein annotation sets from our study  
-`cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa`  
+```
+cat ../orthogrouping/all_proteomes_processed/*.faa > Mo.fa
+```
 
-Run Blast search between these two concatnated fasta files  
-<code>module load blast #v2.7.1+   
+Run Blast (v2.7.1+) search between these two concatnated fasta files  
+```  
 mkdir blastdb  
 makeblastdb -in Mo.fa -out blastdb/Mo -dbtype 'prot'  
 blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 52 -evalue 1e-10  
-       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out</code>
+       -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out
+```
 
 Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures.  
-`python choose_representative.py`       
+```python choose_representative.py```  
 
 This will generate two files:  
 [1] AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded.  
