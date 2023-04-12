@@ -11,3 +11,6 @@ SignalP v4.1 was used to predict the signal peptides.The parameters used for the
 Also see <code>signalp.slurm</code>   
 
 <code>signalp -t euk -u 0.34 -U 0.34 -f short > signalp.out </code>   
+
+## 
+tmhmm --short rep.fasta  > tmhmm.out
