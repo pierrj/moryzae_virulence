@@ -40,9 +40,9 @@ python choose_representative.py
   
   
 This will generate two files:  
-[1] AF2.list: These 9447 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded.  
+**AF2.list**: These 9447 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded.  
 
-[2] Predict.list: These 5337 structures will be predicted with AlphaFold v2.2.2.  
+**Predict.list**: These 5337 structures will be predicted with AlphaFold v2.2.2.  
 
 Download pre-generated structures for M. oryzae from the AlphaFold database. The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131. This requires 'gsutil'.
 
@@ -82,16 +82,7 @@ python compute_msa._2_.py ${prefix}
 ```       
 ### Predicting protein structures  
 
-We will predict 5299 sequences in Predict.list. It turned out a few sequences in this list have unknown amino acid sequence 'X', which causes issues in the relaxation step of AlphaFold. Let's replace them. 
-       
-BR0019_14_02091T0  -> replaced with gene_8576_NI907 (different length, no X)  
-BR0019_1_00155T0   -> replaced with gene_5088_NI907 (different length, no X)  
-BR0019_32_03871T0  -> replaced with gene_6814_NI907 (different length, no X)  
-CD0073_61_05782T0  -> replaced with CH0452_89_07103T0 (same length, no X)  
-CH0063_592_11157T0 -> replaced with CH0072_312_10461T0 (same length, no X)  
-CH0333_1_00001T0   -> Removed a single 'X' at the very end of the sequences  
-       
-Get each sequence into a new folder to set up for AF2. For this iteration, using Biopython will be much faster instead of what is given here. 
+We will predict 5337 sequences in Predict.list. Get each sequence into a new folder to set up for AF2. For this iteration, using Biopython will be much faster instead of what is given here. 
 ```
 cd /global/scratch/users/skyungyong/CO_Pierre_MO/Analysis/Structures  
 less Predict.list | awk '{print $2}' | sort -u | while read seq; do \
