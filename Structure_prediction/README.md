@@ -37,11 +37,12 @@ We have one representative sequence from 13387 OGs (one OG, N0.HOG0013128, is di
 ```
 python choose_representative.py
 ```  
-
+  
+  
 This will generate two files:  
-[1] AF2.list: These 9446 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded.  
+[1] AF2.list: These 9447 sequences have predicted structures in the AF2 database with 98% or more sequence identity and 100% coverage. These will be downloaded.  
 
-[2] Predict.list: These 5299 structures will be predicted with AlphaFold v2.2.2.  
+[2] Predict.list: These 5337 structures will be predicted with AlphaFold v2.2.2.  
 
 Download pre-generated structures for M. oryzae from the AlphaFold database. The TAXIDs are 242507 for 70-15, 1143189 for Y34, and 1143193 for P131. This requires 'gsutil'.
 
