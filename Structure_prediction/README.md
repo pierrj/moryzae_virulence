@@ -33,7 +33,7 @@ blastp -query uniprot.ref.fasta -db blastdb/Mo -max_target_seqs 5 -num_threads 5
        -max_hsps 1 -outfmt "6 std qlen slen" -out uniprot.ref.against.Mo.blast.out
 ```
 
-Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures.  
+We have one representative sequence from 13387 OGs (one OG, N0.HOG0013128, is discarded as its two members are mostly composed of 'X'), 1256 unassigned genes, 133 phylogenetically misplaced genes, and 8 sequences that are somehow discarded by OrthoFinder. 14784 sequences' structures should be either downloaded or predicted. Based on the BLAST outputs, decide whether we can download the existing structures or need to predict the structures.  
 ```
 python choose_representative.py
 ```  
