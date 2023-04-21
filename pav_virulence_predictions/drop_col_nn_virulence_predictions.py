@@ -3,11 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from matplotlib.colors import ListedColormap
 from sklearn.preprocessing import LabelEncoder
 from sklearn.manifold import TSNE
 from collections import Counter
@@ -15,8 +12,6 @@ import math
 import random
 from sklearn.model_selection import KFold
 from sklearn.metrics import confusion_matrix
-import torch.optim.lr_scheduler as lr_scheduler
-from sklearn.metrics import roc_auc_score
 import sys
 
 file_path = sys.argv[1]
