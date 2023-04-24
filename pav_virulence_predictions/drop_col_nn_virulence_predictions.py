@@ -52,153 +52,153 @@ df_pav = df_pav.loc[:, df_pav.var() != 0]
 
 print('test')
 
-# ## normalize data and convert to tensor
-# scaler = StandardScaler()
-# X = scaler.fit_transform(df_pav)
-# X = torch.tensor(X, dtype=torch.float32)
-# class My_Network(nn.Module):
-#     def __init__(self, num_layers, hidden_size, input_dim, output_dim, dropout=False, dropout_perc=0.5):
-#         super().__init__()
-#         self.input_layer  = nn.Sequential(
-#             nn.Linear(input_dim, hidden_size),
-#             nn.BatchNorm1d(hidden_size),
-#         )
-#         self.output_layer = nn.Sequential(
-#             nn.Linear(hidden_size, output_dim),
-#             nn.Sigmoid()
-#         )
-#         self.hidden_layers = nn.Sequential()
-#         for i in range(num_layers):
-#           self.hidden_layers.add_module(f"hidden_layer_{i}", nn.Linear(hidden_size, hidden_size))
-#           if dropout:
-#             self.hidden_layers.add_module(f"dropout_{i}", nn.Dropout(dropout_perc))
-#           self.hidden_layers.add_module(f"activation_{i}", nn.ReLU())
+## normalize data and convert to tensor
+scaler = StandardScaler()
+X = scaler.fit_transform(df_pav)
+X = torch.tensor(X, dtype=torch.float32)
+class My_Network(nn.Module):
+    def __init__(self, num_layers, hidden_size, input_dim, output_dim, dropout=False, dropout_perc=0.5):
+        super().__init__()
+        self.input_layer  = nn.Sequential(
+            nn.Linear(input_dim, hidden_size),
+            nn.BatchNorm1d(hidden_size),
+        )
+        self.output_layer = nn.Sequential(
+            nn.Linear(hidden_size, output_dim),
+            nn.Sigmoid()
+        )
+        self.hidden_layers = nn.Sequential()
+        for i in range(num_layers):
+          self.hidden_layers.add_module(f"hidden_layer_{i}", nn.Linear(hidden_size, hidden_size))
+          if dropout:
+            self.hidden_layers.add_module(f"dropout_{i}", nn.Dropout(dropout_perc))
+          self.hidden_layers.add_module(f"activation_{i}", nn.ReLU())
 
-#     def forward(self, X):
-#       out = self.input_layer(X)
-#       out = self.hidden_layers(out)
-#       logits = self.output_layer(out)
-#       return logits
+    def forward(self, X):
+      out = self.input_layer(X)
+      out = self.hidden_layers(out)
+      logits = self.output_layer(out)
+      return logits
 
-# def train_nn(model, X_train, y_train, X_test, y_test, epochs=15, batch_size=32, lr=1e-3, verbose=False):
-#     """
-#     Q:  write the training loop following the schema shown above.
+def train_nn(model, X_train, y_train, X_test, y_test, epochs=15, batch_size=32, lr=1e-3, verbose=False):
+    """
+    Q:  write the training loop following the schema shown above.
 
-#     Inputs
-#     - model: the model to be trained - a PyTorch nn.Module class object
-#     - X_train, y_train, X_val, y_val: training and validation data
-#     - epochs: num epochs, or the number of times we want to run through the entire training data
-#     - batch_size: number of data points per batch
-#     - lr: learning rate
-#     - optimizer: optimizer used
+    Inputs
+    - model: the model to be trained - a PyTorch nn.Module class object
+    - X_train, y_train, X_val, y_val: training and validation data
+    - epochs: num epochs, or the number of times we want to run through the entire training data
+    - batch_size: number of data points per batch
+    - lr: learning rate
+    - optimizer: optimizer used
 
-#     Outputs
-#     - losses: a list of losses
-#     - accuracies: a list of validation accuracies
-#     - train_accs: a list of training accuracies
-#     """
+    Outputs
+    - losses: a list of losses
+    - accuracies: a list of validation accuracies
+    - train_accs: a list of training accuracies
+    """
 
-#     N, D = X_train.shape
+    N, D = X_train.shape
 
-#     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-#     loss_fn = nn.BCELoss()
+    loss_fn = nn.BCELoss()
 
-#     losses = []
+    losses = []
 
-#     # scheduler = lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_factor=0.01, total_iters=epochs)
+    # scheduler = lr_scheduler.LinearLR(optimizer, start_factor=1.0, end_factor=0.01, total_iters=epochs)
 
-#     for epoch in range(epochs):
-#       logits = model(X_train)
+    for epoch in range(epochs):
+      logits = model(X_train)
 
-#       loss = loss_fn(logits, y_train)
+      loss = loss_fn(logits, y_train)
 
-#       optimizer.zero_grad()
-#       loss.backward()
-#       optimizer.step()
+      optimizer.zero_grad()
+      loss.backward()
+      optimizer.step()
 
-#       training_loss = loss
+      training_loss = loss
 
-#       testing_loss = loss_fn(model(X_test), y_test)
+      testing_loss = loss_fn(model(X_test), y_test)
 
-#       # print epoch, loss, and current test accuracy
-#       if verbose:
-#         print(f"Epoch {epoch}:\t training loss {training_loss} & testing loss {testing_loss}")
+      # print epoch, loss, and current test accuracy
+      if verbose:
+        print(f"Epoch {epoch}:\t training loss {training_loss} & testing loss {testing_loss}")
 
-#     return losses
+    return losses
 
-# ## first convert the phenotypes to disease and no disease
-# def convert_to_binary(x):
-#     if x >= 0 and x <= 2:
-#         return 0
-#     elif x >= 3 and x <= 5:
-#         return 1
-#     else:
-#         return x
+## first convert the phenotypes to disease and no disease
+def convert_to_binary(x):
+    if x >= 0 and x <= 2:
+        return 0
+    elif x >= 3 and x <= 5:
+        return 1
+    else:
+        return x
     
 
-# df_phenotypes_binary = df_phenotypes_untransformed.applymap(convert_to_binary)
+df_phenotypes_binary = df_phenotypes_untransformed.applymap(convert_to_binary)
 
 
-# layers = 1
-# nodes = 50
-# epochs = 500
-# lr = 1e-4
-# dropout = False
-# dropout_perc = 0.5
-# y = torch.tensor(df_phenotypes_binary.values, dtype=torch.float32)
-# average_fprs = []
-# average_tprs = []
-# average_f1s = []
-# for k in [0,1,2]:
-#   kfold_fprs = []
-#   kfold_tprs = []
-#   kfold_f1s = []
-#   kf = KFold(n_splits=5, shuffle=True)
-#   for train_index, test_index in kf.split(X):
-#     X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
-#     my_model = My_Network(1,50,X_train.shape[1], y.shape[1], dropout=False)
-#     losses = train_nn(my_model, X_train, y_train, X_test, y_test, epochs=epochs, lr=lr, verbose=False)
-#     ## evaluate ##
-#     my_model.eval()
-#     preds = my_model(X_test)
-#     tns = 0
-#     fps = 0
-#     fns = 0
-#     tps = 0
-#     for i in range(len(preds)):
-#       tn, fp, fn, tp = confusion_matrix(y_test[i], torch.round(preds[i]).detach().numpy()).ravel()
-#       tns += tn
-#       fps += fp
-#       fns += fn
-#       tps += tp
-#     fpr = fps / (fps + tns)  # false positive rate
-#     tpr = tps / (tps + fns)  # true positive rate
-#     kfold_fprs.append(fpr)
-#     kfold_tprs.append(tpr)
-#     precision = tps / (tps+fps)
-#     recall = tps / (tps+fns)
-#     f1 = 2*tps/(2*tps+fps+fns)
-#     kfold_f1s.append(f1)
-#   average_tpr = sum(kfold_tprs)/len(kfold_tprs)
-#   average_fpr = sum(kfold_fprs)/len(kfold_fprs)
-#   average_f1 = sum(kfold_f1s)/len(kfold_f1s)
-#   average_tprs.append(average_tpr)
-#   average_fprs.append(average_fpr)
-#   average_f1s.append(average_f1)
-# final_fpr = sum(average_fprs)/len(average_fprs)
-# final_tpr = sum(average_tprs)/len(average_tprs)
-# final_f1 = sum(average_f1s)/len(average_f1s)
+layers = 1
+nodes = 50
+epochs = 500
+lr = 1e-4
+dropout = False
+dropout_perc = 0.5
+y = torch.tensor(df_phenotypes_binary.values, dtype=torch.float32)
+average_fprs = []
+average_tprs = []
+average_f1s = []
+for k in [0,1,2]:
+  kfold_fprs = []
+  kfold_tprs = []
+  kfold_f1s = []
+  kf = KFold(n_splits=5, shuffle=True)
+  for train_index, test_index in kf.split(X):
+    X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
+    my_model = My_Network(1,50,X_train.shape[1], y.shape[1], dropout=False)
+    losses = train_nn(my_model, X_train, y_train, X_test, y_test, epochs=epochs, lr=lr, verbose=False)
+    ## evaluate ##
+    my_model.eval()
+    preds = my_model(X_test)
+    tns = 0
+    fps = 0
+    fns = 0
+    tps = 0
+    for i in range(len(preds)):
+      tn, fp, fn, tp = confusion_matrix(y_test[i], torch.round(preds[i]).detach().numpy()).ravel()
+      tns += tn
+      fps += fp
+      fns += fn
+      tps += tp
+    fpr = fps / (fps + tns)  # false positive rate
+    tpr = tps / (tps + fns)  # true positive rate
+    kfold_fprs.append(fpr)
+    kfold_tprs.append(tpr)
+    precision = tps / (tps+fps)
+    recall = tps / (tps+fns)
+    f1 = 2*tps/(2*tps+fps+fns)
+    kfold_f1s.append(f1)
+  average_tpr = sum(kfold_tprs)/len(kfold_tprs)
+  average_fpr = sum(kfold_fprs)/len(kfold_fprs)
+  average_f1 = sum(kfold_f1s)/len(kfold_f1s)
+  average_tprs.append(average_tpr)
+  average_fprs.append(average_fpr)
+  average_f1s.append(average_f1)
+final_fpr = sum(average_fprs)/len(average_fprs)
+final_tpr = sum(average_tprs)/len(average_tprs)
+final_f1 = sum(average_f1s)/len(average_f1s)
 
-# # set original f1
-# full_model_f1 = final_f1
+# set original f1
+full_model_f1 = final_f1
 
-# print('test')
+print('test')
 
-# with open(ogs_to_drop_file, 'r') as f:
-#     ogs_to_drop = [line.strip() for line in f.readlines()]
+with open(ogs_to_drop_file, 'r') as f:
+    ogs_to_drop = [line.strip() for line in f.readlines()]
 
-# print('test')
+print('test')
 
 # layers = 1
 # nodes = 50
