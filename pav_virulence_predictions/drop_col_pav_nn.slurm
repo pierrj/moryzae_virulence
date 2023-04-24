@@ -22,4 +22,4 @@ if [ -f $OUTPUT_FILE ]; then
     rm $OUTPUT_FILE
 fi
 
-/global/scratch/users/pierrj/conda_envs/pytorch/bin/python /global/scratch/users/pierrj/moryzae_virulence_code/pav_virulence_predictions/drop_col_nn_virulence_predictions.py /global/scratch/users/pierrj/moryzae_virulence_project/pav_virulence_prediction/ og_list >> $OUTPUT_FILE
+/global/scratch/users/pierrj/conda_envs/pytorch/bin/python /global/scratch/users/pierrj/moryzae_virulence_code/pav_virulence_predictions/drop_col_nn_virulence_predictions.py /global/scratch/users/pierrj/moryzae_virulence_project/pav_virulence_prediction/ og_list
