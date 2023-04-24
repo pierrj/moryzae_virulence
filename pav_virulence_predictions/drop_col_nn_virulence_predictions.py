@@ -200,48 +200,48 @@ with open(ogs_to_drop_file, 'r') as f:
 
 print('test')
 
-# layers = 1
-# nodes = 50
-# epochs = 500
-# lr = 1e-4
-# dropout = False
-# dropout_perc = 0.5
-# y = torch.tensor(df_phenotypes_binary.values, dtype=torch.float32)
-# for og in ogs_to_drop:
-#   df_pav_subset = df_pav.drop(og, axis=1).copy(deep=True)
-#   ## normalize data and convert to tensor as before
-#   scaler = StandardScaler()
-#   X = scaler.fit_transform(df_pav)
-#   X = torch.tensor(X, dtype=torch.float32)
-#   average_f1s = []
-#   for k in [0,1,2]:
-#     kfold_f1s = []
-#     kf = KFold(n_splits=5, shuffle=True)
-#     for train_index, test_index in kf.split(X):
-#       X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
-#       my_model = My_Network(1,50,X_train.shape[1], y.shape[1], dropout=False)
-#       losses = train_nn(my_model, X_train, y_train, X_test, y_test, epochs=epochs, lr=lr, verbose=False)
-#       ## evaluate ##
-#       my_model.eval()
-#       preds = my_model(X_test)
-#       tns = 0
-#       fps = 0
-#       fns = 0
-#       tps = 0
-#       for i in range(len(preds)):
-#         tn, fp, fn, tp = confusion_matrix(y_test[i], torch.round(preds[i]).detach().numpy()).ravel()
-#         tns += tn
-#         fps += fp
-#         fns += fn
-#         tps += tp
-#       fpr = fps / (fps + tns)  # false positive rate
-#       tpr = tps / (tps + fns)  # true positive rate
-#       precision = tps / (tps+fps)
-#       recall = tps / (tps+fns)
-#       f1 = 2*tps/(2*tps+fps+fns)
-#       kfold_f1s.append(f1)
-#     average_f1 = sum(kfold_f1s)/len(kfold_f1s)
-#     average_f1s.append(average_f1)
-#   subset_f1 = sum(average_f1s)/len(average_f1s)
-#   diff_f1 = subset_f1 - full_model_f1
-#   print(og, diff_f1)
+layers = 1
+nodes = 50
+epochs = 500
+lr = 1e-4
+dropout = False
+dropout_perc = 0.5
+y = torch.tensor(df_phenotypes_binary.values, dtype=torch.float32)
+for og in ogs_to_drop:
+  df_pav_subset = df_pav.drop(og, axis=1).copy(deep=True)
+  ## normalize data and convert to tensor as before
+  scaler = StandardScaler()
+  X = scaler.fit_transform(df_pav)
+  X = torch.tensor(X, dtype=torch.float32)
+  average_f1s = []
+  for k in [0,1,2]:
+    kfold_f1s = []
+    kf = KFold(n_splits=5, shuffle=True)
+    for train_index, test_index in kf.split(X):
+      X_train, X_test, y_train, y_test = X[train_index], X[test_index], y[train_index], y[test_index]
+      my_model = My_Network(1,50,X_train.shape[1], y.shape[1], dropout=False)
+      losses = train_nn(my_model, X_train, y_train, X_test, y_test, epochs=epochs, lr=lr, verbose=False)
+      ## evaluate ##
+      my_model.eval()
+      preds = my_model(X_test)
+      tns = 0
+      fps = 0
+      fns = 0
+      tps = 0
+      for i in range(len(preds)):
+        tn, fp, fn, tp = confusion_matrix(y_test[i], torch.round(preds[i]).detach().numpy()).ravel()
+        tns += tn
+        fps += fp
+        fns += fn
+        tps += tp
+      fpr = fps / (fps + tns)  # false positive rate
+      tpr = tps / (tps + fns)  # true positive rate
+      precision = tps / (tps+fps)
+      recall = tps / (tps+fns)
+      f1 = 2*tps/(2*tps+fps+fns)
+      kfold_f1s.append(f1)
+    average_f1 = sum(kfold_f1s)/len(kfold_f1s)
+    average_f1s.append(average_f1)
+  subset_f1 = sum(average_f1s)/len(average_f1s)
+  diff_f1 = subset_f1 - full_model_f1
+  print(og, diff_f1)
