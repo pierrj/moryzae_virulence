@@ -52,6 +52,8 @@ df_pav = df_pav.loc[:, df_pav.var() != 0]
 
 print('test')
 
+torch.set_num_threads(1)
+
 ## normalize data and convert to tensor
 scaler = StandardScaler()
 X = scaler.fit_transform(df_pav)
