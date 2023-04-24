@@ -54,6 +54,8 @@ scaler = StandardScaler()
 X = scaler.fit_transform(df_pav)
 X = torch.tensor(X, dtype=torch.float32)
 
+print('test')
+
 class My_Network(nn.Module):
     def __init__(self, num_layers, hidden_size, input_dim, output_dim, dropout=False, dropout_perc=0.5):
         super().__init__()
@@ -190,6 +192,8 @@ final_f1 = sum(average_f1s)/len(average_f1s)
 
 # set original f1
 full_model_f1 = final_f1
+
+print('test')
 
 with open(ogs_to_drop_file, 'r') as f:
     ogs_to_drop = [line.strip() for line in f.readlines()]
